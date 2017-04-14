@@ -1,5 +1,6 @@
-DOCKER_IMAGE_NAME=jboss/jboss-fuse-full
-DOCKER_IMAGE_VERSION=latest
+#!/bin/bash
+DOCKER_IMAGE_NAME=ckarthik17/jboss-fuse-fabric
+DOCKER_IMAGE_VERSION=6.2.1.redhat-169
 
 docker rmi --force=true ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VERSION}
 docker build --force-rm=true --rm=true -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_VERSION} .

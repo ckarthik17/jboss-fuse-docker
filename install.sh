@@ -13,12 +13,12 @@ set -e
 #
 cd /opt/jboss
 # Download and extract the distro
-curl -O ${FUSE_DISTRO_URL}
+#curl -O ${FUSE_DISTRO_URL}
 jar -xvf ${FUSE_ARTIFACT_ID}-${FUSE_VERSION}.zip
 rm ${FUSE_ARTIFACT_ID}-${FUSE_VERSION}.zip
 mv jboss-fuse-${FUSE_VERSION} jboss-fuse
 chmod a+x jboss-fuse/bin/*
-rm jboss-fuse/bin/*.bat jboss-fuse/bin/start jboss-fuse/bin/stop jboss-fuse/bin/status jboss-fuse/bin/patch
+#rm jboss-fuse/bin/*.bat jboss-fuse/bin/start jboss-fuse/bin/stop jboss-fuse/bin/status jboss-fuse/bin/patch
 # Lets remove some bits of the distro which just add extra weight in a docker image.
 rm -rf jboss-fuse/extras
 rm -rf jboss-fuse/quickstarts                                                                              
@@ -66,6 +66,20 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} | %-5.5p | %-16.16t 
 echo '
 bind.address=0.0.0.0
 '>> jboss-fuse/etc/system.properties
-echo '' >> jboss-fuse/etc/users.properties
+echo 'admin=admin,Operator, Maintainer, Deployer, Auditor, Administrator, SuperUser' >> jboss-fuse/etc/users.properties
+
+cd /opt/jboss/jboss-fuse
+./bin/fuse server &
+echo 'Going to sleep...'
+sleep 40
+echo 'Back from sleep. Going to create fabric'
+./bin/client -u admin -p admin 'fabric:create --resolver manualip --manual-ip 0.0.0.0 --wait-for-provisioning'
+echo 'Going to create child containers...'
+./bin/client -u admin -p admin 'fabric:container-create-child root gateway'
+./bin/client -u admin -p admin 'fabric:container-create-child root sample'
+echo 'Stopping the fuse container...'
+./bin/stop
+sleep 10
+echo 'Done'
 
 rm /opt/jboss/install.sh

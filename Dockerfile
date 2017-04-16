@@ -40,4 +40,4 @@ EXPOSE 8181 8101 1099 44444 61616 1883 5672 61613 61617 8883 5671 61614
 
 # lets default to the jboss-fuse dir so folks can more easily navigate to around the server install
 WORKDIR /opt/jboss/jboss-fuse
-CMD /opt/jboss/jboss-fuse/bin/fuse server
+CMD /opt/jboss/jboss-fuse/bin/fuse

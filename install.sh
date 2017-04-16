@@ -80,9 +80,10 @@ sleep 30
 echo '------------ Back from sleep. Going to create fabric'
 ./bin/client -r 2 -d 20 -u admin -p admin "fabric:create --clean --resolver manualip --manual-ip 127.0.0.1 --wait-for-provisioning"
 ./bin/client -r 10 -d 20 -u admin -p admin "fabric:wait-for-provisioning"
-#echo 'Going to create child containers...'
-#./bin/client -u admin -p admin 'fabric:container-create-child root gateway'
-#./bin/client -u admin -p admin 'fabric:container-create-child root sample'
+echo '------------ Going to create child containers...'
+./bin/client -u admin -p admin 'fabric:container-create-child root gateway'
+./bin/client -u admin -p admin 'fabric:container-create-child root sample'
+sleep 30
 echo '------------ Stopping the fuse server...'
 ./bin/stop
 sleep 10

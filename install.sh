@@ -25,17 +25,22 @@ rm -rf jboss-fuse/quickstarts
 #
 # Let the karaf container name/id come from setting the FUSE_KARAF_NAME && FUSE_RUNTIME_ID env vars
 # default to using the container hostname.
-sed -i -e 's/environment.prefix=FABRIC8_/environment.prefix=FUSE_/' jboss-fuse/etc/system.properties
-sed -i -e '/karaf.name = root/d' jboss-fuse/etc/system.properties
-sed -i -e '/runtime.id=/d' jboss-fuse/etc/system.properties
+#sed -i -e 's/environment.prefix=FABRIC8_/environment.prefix=FUSE_/' jboss-fuse/etc/system.properties
+#sed -i -e '/karaf.name = root/d' jboss-fuse/etc/system.properties
+#sed -i -e '/runtime.id=/d' jboss-fuse/etc/system.properties
 echo '
 if [ -z "$FUSE_KARAF_NAME" ]; then 
-  export FUSE_KARAF_NAME="$HOSTNAME"
+  export FUSE_KARAF_NAME="root"
 fi
 if [ -z "$FUSE_RUNTIME_ID" ]; then 
   export FUSE_RUNTIME_ID="$FUSE_KARAF_NAME"
 fi          
 export KARAF_OPTS="-Dkaraf.name=${FUSE_KARAF_NAME} -Druntime.id=${FUSE_RUNTIME_ID}"
+
+JAVA_MIN_MEM=1024M # Minimum memory for the JVM
+JAVA_MAX_MEM=2048M # Maximum memory for the JVM
+export JAVA_MIN_MEM
+export JAVA_MAX_MEM
 '>> jboss-fuse/bin/setenv   
 #
 # Move the bundle cache and tmp directories outside of the data dir so it's not persisted between container runs
@@ -70,16 +75,17 @@ echo 'admin=admin,Operator, Maintainer, Deployer, Auditor, Administrator, SuperU
 
 cd /opt/jboss/jboss-fuse
 ./bin/fuse server &
-echo 'Going to sleep...'
-sleep 40
-echo 'Back from sleep. Going to create fabric'
-./bin/client -u admin -p admin 'fabric:create --resolver manualip --manual-ip 0.0.0.0 --wait-for-provisioning'
-echo 'Going to create child containers...'
-./bin/client -u admin -p admin 'fabric:container-create-child root gateway'
-./bin/client -u admin -p admin 'fabric:container-create-child root sample'
-echo 'Stopping the fuse container...'
+echo '------------ Going to sleep...'
+sleep 30
+echo '------------ Back from sleep. Going to create fabric'
+./bin/client -r 2 -d 20 -u admin -p admin "fabric:create --clean --resolver manualip --manual-ip 127.0.0.1 --wait-for-provisioning"
+./bin/client -r 10 -d 20 -u admin -p admin "fabric:wait-for-provisioning"
+#echo 'Going to create child containers...'
+#./bin/client -u admin -p admin 'fabric:container-create-child root gateway'
+#./bin/client -u admin -p admin 'fabric:container-create-child root sample'
+echo '------------ Stopping the fuse server...'
 ./bin/stop
 sleep 10
-echo 'Done'
+echo '------------ Done'
 
 rm /opt/jboss/install.sh
